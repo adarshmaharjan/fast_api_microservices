@@ -1,10 +1,11 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.background import BackgroundTasks
-from redis_om import get_redis_connection, HashModel
-from starlette.requests import Request
-import requests, time
+import time
 
+import requests
+from fastapi import FastAPI
+from fastapi.background import BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from redis_om import HashModel, get_redis_connection
+from starlette.requests import Request
 
 app = FastAPI()
 
