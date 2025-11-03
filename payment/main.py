@@ -7,15 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from redis_om import HashModel, get_redis_connection
 from starlette.requests import Request
 
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://loaclhost:3000"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 """
   Should be different database
 """
@@ -24,6 +15,15 @@ redis = get_redis_connection(
     port=17699,
     password="kkPkS1zgYMIp9DMRPq8uq3z4fQC0GYCT",
     decode_responses=True,
+)
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -36,7 +36,7 @@ class Order(HashModel):
     status: str
 
     class Meta:
-        database: redis
+        database = redis
 
 
 @app.get("/orders/{pk}")
@@ -45,11 +45,13 @@ def get(pk: str):
 
 
 @app.post("/orders")
-async def create(request: Request, background_tasks: BackgroundTasks):
-    body = await request.body()
+async def create(request: Request, background_tasks:BackgroundTasks):
+    body = await request.json()
 
-    req = request.get(f"http://localhost:8000/{body[id]}")
+    req = requests.get(f"http://localhost:8000/products/{body['id']}")
     product = req.json()
+
+    print(product)
 
     order = Order(
         product_id=body["id"],
@@ -61,7 +63,6 @@ async def create(request: Request, background_tasks: BackgroundTasks):
     )
 
     order.save()
-
     background_tasks.add_task(order_completed, order)
     return order
 
